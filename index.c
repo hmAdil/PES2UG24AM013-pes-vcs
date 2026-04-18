@@ -16,6 +16,7 @@
 // TODO functions:     index_load, index_save, index_add
 
 #include "index.h"
+#include "tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,8 +239,19 @@ int index_add(Index *index, const char *path) {
     size_t size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    void *data = malloc(size);
-    fread(data, 1, size, f);
+    void *data = NULL;
+    if (size > 0) {
+        data = malloc(size);
+        if (!data) {
+            fclose(f);
+            return -1;
+        }
+        if (fread(data, 1, size, f) != size) {
+            free(data);
+            fclose(f);
+            return -1;
+        }
+    }
     fclose(f);
 
     ObjectID id;
@@ -248,7 +260,7 @@ int index_add(Index *index, const char *path) {
         return -1;
     }
 
-    free(data);
+    if(data) free(data);
 
     struct stat st;
     if (stat(path, &st) < 0) return -1;
