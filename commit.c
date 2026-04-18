@@ -194,8 +194,26 @@ int head_update(const ObjectID *new_commit) {
 //
 // Returns 0 on success, -1 on error.
 int commit_create(const char *message, ObjectID *commit_id_out) {
-    // TODO: Implement commit creation
-    // (See Lab Appendix for logical steps)
-    (void)message; (void)commit_id_out;
-    return -1;
+    ObjectID tree_id;
+
+    if (tree_from_index(&tree_id) < 0) return -1;
+
+    char tree_hex[HASH_HEX_SIZE + 1];
+    hash_to_hex(&tree_id, tree_hex);
+
+    size_t msg_len = strlen(message);
+
+    size_t total_len = strlen("tree ") + HASH_HEX_SIZE + 1 +
+                       strlen("message ") + msg_len + 1;
+
+    char *data = malloc(total_len);
+
+    int offset = 0;
+    offset += sprintf(data + offset, "tree %s\n", tree_hex);
+    offset += sprintf(data + offset, "message %s\n", message);
+
+    int rc = object_write(OBJ_COMMIT, data, offset, commit_id_out);
+
+    free(data);
+    return rc;
 }
