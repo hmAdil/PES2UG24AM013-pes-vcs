@@ -2,8 +2,14 @@
 
 ## Student Details
 
-* Name: Adil Ahmed
-* SRN: PES2UG24AM013
+* **Name:** Adil Ahmed
+* **SRN:** PES2UG24AM013
+
+---
+
+## GitHub Repository
+
+🔗 https://github.com/hmAdil/PES2UG24AM013-pes-vcs
 
 ---
 
@@ -128,3 +134,12 @@ The system can be improved by adding features such as branching, merging, and be
 ## Conclusion
 
 Successfully implemented a simplified version control system with object storage, tree structures, staging area, commit history, and full integration testing.
+
+---
+
+## Declaration
+
+I declare that this submission is my own work and I have properly attributed any external resources used.
+
+**Signature:** Adil Ahmed
+**Date:** 18/04/2026
