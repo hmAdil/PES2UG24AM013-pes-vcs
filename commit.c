@@ -201,19 +201,45 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
     char tree_hex[HASH_HEX_SIZE + 1];
     hash_to_hex(&tree_id, tree_hex);
 
-    size_t msg_len = strlen(message);
+    ObjectID parent_id;
+    int has_parent = (head_read(&parent_id) == 0);
 
-    size_t total_len = strlen("tree ") + HASH_HEX_SIZE + 1 +
-                       strlen("message ") + msg_len + 1;
+    char parent_hex[HASH_HEX_SIZE + 1];
+    if (has_parent)
+        hash_to_hex(&parent_id, parent_hex);
+
+    const char *author = pes_author();
+
+    size_t total_len = 0;
+    total_len += strlen("tree ") + HASH_HEX_SIZE + 1;
+
+    if (has_parent)
+        total_len += strlen("parent ") + HASH_HEX_SIZE + 1;
+
+    total_len += strlen("author ") + strlen(author) + 1;
+    total_len += strlen("committer ") + strlen(author) + 1;
+    total_len += 1;
+    total_len += strlen(message) + 1;
 
     char *data = malloc(total_len);
 
     int offset = 0;
     offset += sprintf(data + offset, "tree %s\n", tree_hex);
-    offset += sprintf(data + offset, "message %s\n", message);
 
-    int rc = object_write(OBJ_COMMIT, data, offset, commit_id_out);
+    if (has_parent)
+        offset += sprintf(data + offset, "parent %s\n", parent_hex);
+
+    offset += sprintf(data + offset, "author %s\n", author);
+    offset += sprintf(data + offset, "committer %s\n", author);
+    offset += sprintf(data + offset, "\n");
+    offset += sprintf(data + offset, "%s\n", message);
+
+    if (object_write(OBJ_COMMIT, data, offset, commit_id_out) < 0) {
+        free(data);
+        return -1;
+    }
 
     free(data);
-    return rc;
+
+    return head_update(commit_id_out);
 }
